@@ -46,7 +46,17 @@ const Landing = () => {
                 Your comprehensive medical directory platform. Connect patients with qualified healthcare professionals and streamline medical practice management.
               </p>
               
-              <div className="grid sm:grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
+              <div className="grid sm:grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
+                <Button
+                  onClick={() => navigate('/directory')}
+                  variant="default"
+                  size="lg"
+                  className="flex items-center gap-3"
+                >
+                  <Users className="w-5 h-5" />
+                  View Directory
+                </Button>
+                
                 <Button
                   onClick={() => navigate('/doctor-auth')}
                   variant="medical"

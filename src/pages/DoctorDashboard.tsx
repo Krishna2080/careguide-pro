@@ -81,7 +81,7 @@ const DoctorDashboard = () => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ profile_photo_url: data.publicUrl })
-        .eq('id', user.id);
+        .eq('user_id', user.id);
 
       if (updateError) throw updateError;
 
@@ -117,7 +117,7 @@ const DoctorDashboard = () => {
       const { error } = await supabase
         .from('profiles')
         .update(updateData)
-        .eq('id', user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
