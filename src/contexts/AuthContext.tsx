@@ -1,28 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 
-interface Profile {
-  id: string;
-  full_name: string;
-  email: string;
-  role: 'doctor' | 'admin';
-  phone_number?: string;
-  city?: string;
-  hospital?: string;
-  speciality?: string;
-  years_of_experience?: number;
-  availability?: string;
-  opd?: string;
-  notes?: string;
-  profile_photo_url?: string;
-}
+const SUPABASE_URL = "https://qqolkvwhjdxayrsadjfd.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxb2xrdndoamR4YXlyc2FkamZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MDY5NzMsImV4cCI6MjA3MDA4Mjk3M30.sxPiY2j2Qn82e72M2Y3aCWAbiH4IkmPI0M9uvleVZqg";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  profile: Profile | null;
+  user: any;
+  session: any;
+  profile: any;
   loading: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
   signUpWithEmail: (email: string, password: string, userData: { full_name: string; role: 'doctor' | 'admin' }) => Promise<{ error: any }>;
@@ -32,9 +26,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -83,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setProfile(data as Profile);
+      setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
