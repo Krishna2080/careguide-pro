@@ -65,8 +65,8 @@ const DoctorDashboard = () => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const filePath = fileName;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -347,7 +347,6 @@ const DoctorDashboard = () => {
                 <Button 
                   onClick={handleSaveProfile}
                   className="w-full"
-                  variant="medical"
                   disabled={saving}
                 >
                   {saving ? 'Saving...' : 'Save Profile'}
