@@ -1,21 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const SUPABASE_URL = "https://qqolkvwhjdxayrsadjfd.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxb2xrdndoamR4YXlyc2FkamZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MDY5NzMsImV4cCI6MjA3MDA4Mjk3M30.sxPiY2j2Qn82e72M2Y3aCWAbiH4IkmPI0M9uvleVZqg";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
-
 interface AuthContextType {
-  user: any;
-  session: any;
+  user: User | null;
+  session: Session | null;
   profile: any;
   loading: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
@@ -26,8 +16,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const [session, setSession] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -66,18 +56,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      const { data, error } = await fetch(`https://qqolkvwhjdxayrsadjfd.supabase.co/rest/v1/profiles?user_id=eq.${userId}&select=*`, {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxb2xrdndoamR4YXlyc2FkamZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MDY5NzMsImV4cCI6MjA3MDA4Mjk3M30.sxPiY2j2Qn82e72M2Y3aCWAbiH4IkmPI0M9uvleVZqg',
+          'Authorization': `Bearer ${session?.access_token || ''}`,
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json()).catch(e => ({ data: null, error: e }));
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching profile:', error);
         return;
       }
 
-      setProfile(data);
+      setProfile(data?.[0] || null);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
