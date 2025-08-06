@@ -56,20 +56,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await fetch(`https://qqolkvwhjdxayrsadjfd.supabase.co/rest/v1/profiles?user_id=eq.${userId}&select=*`, {
-        headers: {
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxb2xrdndoamR4YXlyc2FkamZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MDY5NzMsImV4cCI6MjA3MDA4Mjk3M30.sxPiY2j2Qn82e72M2Y3aCWAbiH4IkmPI0M9uvleVZqg',
-          'Authorization': `Bearer ${session?.access_token || ''}`,
-          'Content-Type': 'application/json'
-        }
-      }).then(res => res.json()).catch(e => ({ data: null, error: e }));
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
         return;
       }
 
-      setProfile(data?.[0] || null);
+      setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
