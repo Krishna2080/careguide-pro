@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch user profile
           setTimeout(() => {
             fetchUserProfile(session.user.id);
-          }, 0);
+          }, 100);
         } else {
           setProfile(null);
         }
@@ -56,20 +56,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Use raw SQL query to avoid type issues
+      const { data, error } = await supabase.rpc('fetch_user_profile', { user_id: userId });
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching profile:', error);
+        // If function doesn't exist, try direct query
+        const response = await supabase
+          .from('profiles')
+          .select('id, user_id, full_name, email, role, phone_number, city, hospital, speciality, years_of_experience, availability, opd, notes, profile_photo_url, created_at, updated_at')
+          .eq('user_id', userId)
+          .single();
+        
+        if (response.data) {
+          setProfile(response.data);
+        }
         return;
       }
 
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Fallback: try to get profile data another way
+      try {
+        const fallbackResponse = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .limit(1);
+        
+        if (fallbackResponse.data && fallbackResponse.data.length > 0) {
+          setProfile(fallbackResponse.data[0]);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback profile fetch failed:', fallbackError);
+      }
     }
   };
 

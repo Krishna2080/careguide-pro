@@ -18,7 +18,7 @@ export type Database = {
         Row: {
           availability: string | null
           city: string | null
-          created_at: string | null
+          created_at: string
           email: string
           full_name: string
           hospital: string | null
@@ -29,30 +29,32 @@ export type Database = {
           profile_photo_url: string | null
           role: string
           speciality: string | null
-          updated_at: string | null
+          updated_at: string
+          user_id: string
           years_of_experience: number | null
         }
         Insert: {
           availability?: string | null
           city?: string | null
-          created_at?: string | null
+          created_at?: string
           email: string
           full_name: string
           hospital?: string | null
-          id: string
+          id?: string
           notes?: string | null
           opd?: string | null
           phone_number?: string | null
           profile_photo_url?: string | null
-          role?: string
+          role: string
           speciality?: string | null
-          updated_at?: string | null
+          updated_at?: string
+          user_id: string
           years_of_experience?: number | null
         }
         Update: {
           availability?: string | null
           city?: string | null
-          created_at?: string | null
+          created_at?: string
           email?: string
           full_name?: string
           hospital?: string | null
@@ -63,7 +65,8 @@ export type Database = {
           profile_photo_url?: string | null
           role?: string
           speciality?: string | null
-          updated_at?: string | null
+          updated_at?: string
+          user_id?: string
           years_of_experience?: number | null
         }
         Relationships: []
