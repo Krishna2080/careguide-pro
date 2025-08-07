@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,9 +14,7 @@ import {
   MapPin, 
   Building2, 
   Clock, 
-  User,
-  LogOut,
-  Filter
+  User
 } from 'lucide-react';
 
 interface Doctor {
@@ -40,8 +36,6 @@ interface Doctor {
 }
 
 const DoctorDirectory = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
   
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -52,12 +46,8 @@ const DoctorDirectory = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
     fetchDoctors();
-  }, [user, navigate]);
+  }, []);
 
   useEffect(() => {
     filterDoctors();
@@ -132,17 +122,8 @@ const DoctorDirectory = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Available Doctors ({filteredDoctors.length})</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              Welcome, {user?.email}
-            </span>
-            <Button onClick={signOut} variant="outline" className="flex items-center gap-2">
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </div>
         </div>
       </header>
 
