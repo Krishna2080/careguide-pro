@@ -14,6 +14,7 @@ import { LogOut, Upload, User, Save, Camera } from 'lucide-react';
 
 const DoctorDashboard = () => {
   const { user, profile, signOut } = useAuth();
+  const [localProfile, setProfile] = useState(profile);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -38,20 +39,25 @@ const DoctorDashboard = () => {
       return;
     }
 
-    if (profile) {
+    const currentProfile = localProfile || profile;
+    if (currentProfile) {
       setFormData({
-        full_name: profile.full_name || '',
-        phone_number: profile.phone_number || '',
-        city: profile.city || '',
-        hospital: profile.hospital || '',
-        speciality: profile.speciality || '',
-        years_of_experience: profile.years_of_experience?.toString() || '',
-        availability: profile.availability || '',
-        opd: profile.opd || '',
-        notes: profile.notes || '',
+        full_name: currentProfile.full_name || '',
+        phone_number: currentProfile.phone_number || '',
+        city: currentProfile.city || '',
+        hospital: currentProfile.hospital || '',
+        speciality: currentProfile.speciality || '',
+        years_of_experience: currentProfile.years_of_experience?.toString() || '',
+        availability: currentProfile.availability || '',
+        opd: currentProfile.opd || '',
+        notes: currentProfile.notes || '',
       });
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, localProfile, navigate]);
+
+  useEffect(() => {
+    setProfile(profile);
+  }, [profile]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -90,8 +96,10 @@ const DoctorDashboard = () => {
         description: "Your profile photo has been successfully updated.",
       });
 
-      // Refresh the page to show the new image
-      window.location.reload();
+      // Refresh profile data instead of reloading page
+      if (profile) {
+        setProfile({ ...profile, profile_photo_url: data.publicUrl });
+      }
     } catch (error: any) {
       toast({
         title: "Upload failed",
@@ -136,7 +144,9 @@ const DoctorDashboard = () => {
     }
   };
 
-  if (!user || !profile) {
+  const currentProfile = localProfile || profile;
+  
+  if (!user || !currentProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -147,7 +157,7 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-subtle" style={{ paddingBottom: 'env(keyboard-inset-height, 0px)' }}>
       {/* Header */}
       <header className="bg-background border-b shadow-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -174,11 +184,11 @@ const DoctorDashboard = () => {
                 <div className="relative inline-block">
                   <Avatar className="w-32 h-32 mx-auto">
                     <AvatarImage 
-                      src={profile.profile_photo_url} 
-                      alt={profile.full_name}
+                      src={currentProfile.profile_photo_url} 
+                      alt={currentProfile.full_name}
                     />
                     <AvatarFallback className="text-2xl">
-                      {profile.full_name.split(' ').map(n => n[0]).join('')}
+                      {currentProfile.full_name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-2 -right-2">
@@ -199,8 +209,8 @@ const DoctorDashboard = () => {
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-lg">{profile.full_name}</h3>
-                  <p className="text-muted-foreground">{profile.email}</p>
+                  <h3 className="font-semibold text-lg">{currentProfile.full_name}</h3>
+                  <p className="text-muted-foreground">{currentProfile.email}</p>
                   <p className="text-sm text-primary font-medium">Doctor</p>
                 </div>
                 
@@ -223,7 +233,7 @@ const DoctorDashboard = () => {
                   Update your professional details and contact information
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 pb-20">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="full_name">Full Name</Label>

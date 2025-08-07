@@ -66,6 +66,8 @@ const DoctorDirectory = () => {
         .from('profiles')
         .select('*')
         .eq('role', 'doctor')
+        .not('full_name', 'is', null)
+        .not('speciality', 'is', null)
         .order('full_name');
 
       if (error) throw error;
