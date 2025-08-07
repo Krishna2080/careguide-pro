@@ -95,13 +95,13 @@ const AdminDashboard = () => {
       );
     }
 
-    if (cityFilter) {
+    if (cityFilter && cityFilter !== 'all') {
       filtered = filtered.filter(doctor => 
         doctor.city?.toLowerCase() === cityFilter.toLowerCase()
       );
     }
 
-    if (specialtyFilter) {
+    if (specialtyFilter && specialtyFilter !== 'all') {
       filtered = filtered.filter(doctor => 
         doctor.speciality?.toLowerCase() === specialtyFilter.toLowerCase()
       );
@@ -290,7 +290,7 @@ const AdminDashboard = () => {
                     <SelectValue placeholder="All cities" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All cities</SelectItem>
+                    <SelectItem value="all">All cities</SelectItem>
                     {uniqueCities.map(city => (
                       <SelectItem key={city} value={city!}>{city}</SelectItem>
                     ))}
@@ -305,7 +305,7 @@ const AdminDashboard = () => {
                     <SelectValue placeholder="All specialties" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All specialties</SelectItem>
+                    <SelectItem value="all">All specialties</SelectItem>
                     {uniqueSpecialties.map(specialty => (
                       <SelectItem key={specialty} value={specialty!}>{specialty}</SelectItem>
                     ))}
