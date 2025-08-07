@@ -1,1 +1,4 @@
 project_id = "qqolkvwhjdxayrsadjfd"
+
+[functions.delete-doctor]
+verify_jwt = true
