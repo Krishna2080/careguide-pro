@@ -67,12 +67,14 @@ const DoctorDirectory = () => {
         .select('*')
         .eq('role', 'doctor')
         .not('full_name', 'is', null)
-        .not('speciality', 'is', null)
         .order('full_name');
 
       if (error) throw error;
+      
+      console.log('Fetched doctors:', data);
       setDoctors(data || []);
     } catch (error: any) {
+      console.error('Error fetching doctors:', error);
       toast({
         title: "Error fetching doctors",
         description: error.message,
