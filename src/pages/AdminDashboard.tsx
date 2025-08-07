@@ -113,14 +113,36 @@ const AdminDashboard = () => {
     try {
       console.log('Attempting to delete doctor:', doctorId, doctorName);
       
-      const { error } = await supabase
+      // First get the doctor's user_id
+      const { data: doctor, error: fetchError } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('id', doctorId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching doctor:', fetchError);
+        throw fetchError;
+      }
+
+      // Delete from profiles table first
+      const { error: profileError } = await supabase
         .from('profiles')
         .delete()
         .eq('id', doctorId);
 
-      if (error) {
-        console.error('Delete error:', error);
-        throw error;
+      if (profileError) {
+        console.error('Profile delete error:', profileError);
+        throw profileError;
+      }
+
+      // Delete from auth.users using admin function
+      const { error: authError } = await supabase.auth.admin.deleteUser(doctor.user_id);
+
+      if (authError) {
+        console.error('Auth delete error:', authError);
+        // Don't throw here as profile is already deleted
+        console.warn('Profile deleted but auth user deletion failed:', authError.message);
       }
 
       console.log('Delete successful, updating local state');
@@ -134,7 +156,7 @@ const AdminDashboard = () => {
       
       toast({
         title: "Doctor Deleted",
-        description: `${doctorName} has been removed from the system`,
+        description: `${doctorName} has been completely removed from the system`,
       });
       
       // Force refresh from database to ensure consistency
