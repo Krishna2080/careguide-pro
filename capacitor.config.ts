@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.352b0036149640f2bfc17bae45650a05',
-  appName: 'Doctor Directory',
+  appId: 'com.careguide.pro',
+  appName: 'CareGuide Pro',
   webDir: 'dist',
   bundledWebRuntime: false,
   plugins: {
