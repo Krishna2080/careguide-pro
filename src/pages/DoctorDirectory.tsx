@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -14,7 +16,11 @@ import {
   MapPin, 
   Building2, 
   Clock, 
-  User
+  User,
+  Menu,
+  Home,
+  UserCheck,
+  Shield
 } from 'lucide-react';
 
 interface Doctor {
@@ -37,6 +43,7 @@ interface Doctor {
 
 const DoctorDirectory = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
@@ -120,10 +127,73 @@ const DoctorDirectory = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Available Doctors ({filteredDoctors.length})</h1>
+      {/* Mobile App Style Header */}
+      <header className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-50">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Hamburger Menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <div className="flex flex-col h-full bg-background">
+                {/* Header */}
+                <div className="bg-primary text-primary-foreground p-6">
+                  <h2 className="text-lg font-semibold">CareGuide Pro</h2>
+                  <p className="text-primary-foreground/80 text-sm">Medical Directory</p>
+                </div>
+                
+                {/* Navigation Menu */}
+                <div className="flex-1 p-4 space-y-2">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start h-12 text-left"
+                    onClick={() => navigate('/')}
+                  >
+                    <Home className="w-5 h-5 mr-3" />
+                    Home
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start h-12 text-left bg-muted"
+                    onClick={() => navigate('/directory')}
+                  >
+                    <Search className="w-5 h-5 mr-3" />
+                    Doctor Directory
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start h-12 text-left"
+                    onClick={() => navigate('/doctor-auth')}
+                  >
+                    <UserCheck className="w-5 h-5 mr-3" />
+                    Doctor Portal
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start h-12 text-left"
+                    onClick={() => navigate('/admin-auth')}
+                  >
+                    <Shield className="w-5 h-5 mr-3" />
+                    Admin Portal
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Title */}
+          <h1 className="text-lg font-semibold flex-1 text-center">
+            Doctors ({filteredDoctors.length})
+          </h1>
+
+          {/* Right space for balance */}
+          <div className="w-10"></div>
         </div>
       </header>
 
