@@ -62,24 +62,58 @@ const DoctorDirectory = () => {
 
   const fetchDoctors = async () => {
     try {
+      setLoading(true);
+      
+      // Explicit column selection for better RLS compatibility
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          id,
+          user_id,
+          full_name,
+          email,
+          role,
+          phone_number,
+          city,
+          hospital,
+          speciality,
+          years_of_experience,
+          availability,
+          opd,
+          notes,
+          profile_photo_url,
+          created_at,
+          updated_at
+        `)
         .eq('role', 'doctor')
         .not('full_name', 'is', null)
         .order('full_name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
       
-      console.log('Fetched doctors:', data);
+      console.log('Successfully fetched doctors:', data?.length || 0);
+      console.log('First doctor sample:', data?.[0]);
+      
       setDoctors(data || []);
+      
+      if (data && data.length === 0) {
+        toast({
+          title: "No doctors found",
+          description: "No registered doctors available at the moment.",
+        });
+      }
     } catch (error: any) {
       console.error('Error fetching doctors:', error);
       toast({
-        title: "Error fetching doctors",
-        description: error.message,
+        title: "Error loading doctors",
+        description: error.message || "Failed to load doctor directory",
         variant: "destructive",
       });
+      // Set empty array so UI shows proper message
+      setDoctors([]);
     } finally {
       setLoading(false);
     }
@@ -263,16 +297,21 @@ const DoctorDirectory = () => {
                       </AvatarFallback>
                     </Avatar>
                     
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 text-sm leading-tight">
-                        {doctor.full_name}
-                      </h3>
-                      {doctor.speciality && (
-                        <p className="text-blue-600 text-xs mt-0.5 capitalize">
-                          {doctor.speciality.replace('-', ' ')}
-                        </p>
-                      )}
-                    </div>
+                     <div className="flex-1 min-w-0">
+                       <h3 className="font-medium text-gray-900 text-sm leading-tight">
+                         Dr. {doctor.full_name}
+                       </h3>
+                       {doctor.speciality && (
+                         <p className="text-blue-600 text-xs mt-0.5 capitalize">
+                           {doctor.speciality.replace('-', ' ')}
+                         </p>
+                       )}
+                       {!doctor.speciality && (
+                         <p className="text-gray-500 text-xs mt-0.5">
+                           General Medicine
+                         </p>
+                       )}
+                     </div>
                   </div>
 
                   {/* Doctor Details */}
@@ -316,29 +355,33 @@ const DoctorDirectory = () => {
                     )}
                   </div>
                   
-                  {/* Action Buttons */}
-                  {doctor.phone_number && (
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleCall(doctor.phone_number!)}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-9 text-xs"
-                        size="sm"
-                      >
-                        <Phone className="w-4 h-4 mr-1" />
-                        Call
-                      </Button>
-                      
-                      <Button
-                        onClick={() => handleWhatsApp(doctor.phone_number!)}
-                        variant="outline"
-                        className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50 h-9 text-xs"
-                        size="sm"
-                      >
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        WhatsApp
-                      </Button>
-                    </div>
-                  )}
+                   {/* Action Buttons */}
+                   {doctor.phone_number ? (
+                     <div className="flex gap-2">
+                       <Button
+                         onClick={() => handleCall(doctor.phone_number!)}
+                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-9 text-xs"
+                         size="sm"
+                       >
+                         <Phone className="w-4 h-4 mr-1" />
+                         Call
+                       </Button>
+                       
+                       <Button
+                         onClick={() => handleWhatsApp(doctor.phone_number!)}
+                         variant="outline"
+                         className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50 h-9 text-xs"
+                         size="sm"
+                       >
+                         <MessageCircle className="w-4 h-4 mr-1" />
+                         WhatsApp
+                       </Button>
+                     </div>
+                   ) : (
+                     <div className="text-center p-2 bg-gray-50 rounded text-xs text-gray-600">
+                       Contact: {doctor.email}
+                     </div>
+                   )}
                 </CardContent>
               </Card>
             ))}
