@@ -57,16 +57,16 @@ const DoctorDirectory = () => {
     
     // Set up real-time subscription for profile changes
     const channel = supabase
-      .channel('doctor-profiles')
+      .channel('public:profiles:role=eq.doctor')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'profiles',
-          filter: 'role=eq.doctor'
+          table: 'profiles'
         },
-        () => {
+        (payload) => {
+          console.log('Profile change detected:', payload);
           // Refetch doctors when any doctor profile changes
           fetchDoctors();
         }
