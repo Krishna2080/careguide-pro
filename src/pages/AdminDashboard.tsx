@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Search, Users, Edit, Trash2, Eye, Filter, Key } from 'lucide-react';
+import { LogOut, Search, Users, Trash2, Filter } from 'lucide-react';
 
 interface Doctor {
   id: string;
@@ -39,12 +39,6 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState('');
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
 
   useEffect(() => {
     if (!user) {
@@ -66,6 +60,7 @@ const AdminDashboard = () => {
 
   const fetchDoctors = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -74,6 +69,10 @@ const AdminDashboard = () => {
       if (error) throw error;
 
       setDoctors(data || []);
+      toast({
+        title: "Data Loaded",
+        description: `Found ${data?.length || 0} doctors`,
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -110,11 +109,7 @@ const AdminDashboard = () => {
     setFilteredDoctors(filtered);
   };
 
-  const deleteDoctor = async (doctorId: string) => {
-    if (!confirm('Are you sure you want to delete this doctor profile?')) {
-      return;
-    }
-
+  const deleteDoctor = async (doctorId: string, doctorName: string) => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -126,64 +121,27 @@ const AdminDashboard = () => {
       setDoctors(prev => prev.filter(doc => doc.id !== doctorId));
       
       toast({
-        title: "Doctor deleted",
-        description: "Doctor profile has been successfully deleted.",
+        title: "Doctor Deleted",
+        description: `${doctorName} has been removed from the system`,
       });
     } catch (error: any) {
       toast({
-        title: "Delete failed",
+        title: "Delete Failed",
         description: error.message,
         variant: "destructive",
       });
     }
   };
 
-  const changePassword = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "New passwords don't match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      toast({
-        title: "Error", 
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword
-      });
-
-      if (error) throw error;
-
-      setShowPasswordDialog(false);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Password update failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   const uniqueCities = [...new Set(doctors.map(doc => doc.city).filter(Boolean))];
   const uniqueSpecialties = [...new Set(doctors.map(doc => doc.speciality).filter(Boolean))];
 
-  if (!user) {
+  if (!user || !profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -206,48 +164,8 @@ const AdminDashboard = () => {
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Key className="w-4 h-4" />
-                  Change Password
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Change Admin Password</DialogTitle>
-                  <DialogDescription>
-                    Update your admin account password for security.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                      placeholder="Enter new password"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      placeholder="Confirm new password"
-                    />
-                  </div>
-                  <Button onClick={changePassword} className="w-full">
-                    Update Password
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-            <Button onClick={signOut} variant="outline" className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Welcome, {profile.full_name}</span>
+            <Button onClick={handleSignOut} variant="outline" className="flex items-center gap-2">
               <LogOut className="w-4 h-4" />
               Sign Out
             </Button>
@@ -379,30 +297,37 @@ const AdminDashboard = () => {
                     </div>
                   )}
                   
-                  <div className="flex gap-2 pt-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => {
-                        // View doctor details modal could be implemented here
-                        toast({
-                          title: "View Details",
-                          description: "Doctor details view coming soon!",
-                        });
-                      }}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => deleteDoctor(doctor.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <div className="flex justify-center pt-4">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete Doctor
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete{' '}
+                            <strong>{doctor.full_name}</strong>'s profile and remove all their data from the system.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteDoctor(doctor.id, doctor.full_name)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete Doctor
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>

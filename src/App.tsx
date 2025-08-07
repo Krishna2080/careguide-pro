@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Landing from "./pages/Landing";
-import AuthPage from "./pages/AuthPage";
+import DoctorAuth from "./pages/DoctorAuth";
+import AdminLogin from "./pages/AdminLogin";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import DoctorDirectory from "./pages/DoctorDirectory";
@@ -22,8 +23,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/doctor-auth" element={<AuthPage userType="doctor" />} />
-            <Route path="/admin-auth" element={<AuthPage userType="admin" />} />
+            <Route path="/doctor-auth" element={<DoctorAuth />} />
+            <Route path="/admin-auth" element={<AdminLogin />} />
             <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/directory" element={<DoctorDirectory />} />
