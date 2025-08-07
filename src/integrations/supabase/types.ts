@@ -97,6 +97,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      make_user_admin: {
+        Args: { user_email: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
