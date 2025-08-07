@@ -54,6 +54,28 @@ const DoctorDirectory = () => {
 
   useEffect(() => {
     fetchDoctors();
+    
+    // Set up real-time subscription for profile changes
+    const channel = supabase
+      .channel('doctor-profiles')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: 'role=eq.doctor'
+        },
+        () => {
+          // Refetch doctors when any doctor profile changes
+          fetchDoctors();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

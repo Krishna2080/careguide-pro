@@ -48,7 +48,7 @@ const DoctorAuth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4 pb-safe">
       <Card className="w-full max-w-md shadow-card">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-12 h-12 bg-gradient-medical rounded-full flex items-center justify-center">

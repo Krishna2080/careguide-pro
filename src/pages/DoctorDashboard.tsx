@@ -157,7 +157,7 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle" style={{ paddingBottom: 'env(keyboard-inset-height, 0px)' }}>
+    <div className="min-h-screen bg-gradient-subtle pb-safe">
       {/* Header */}
       <header className="bg-background border-b shadow-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -233,7 +233,7 @@ const DoctorDashboard = () => {
                   Update your professional details and contact information
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 pb-20">
+              <CardContent className="space-y-6 pb-[120px]">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="full_name">Full Name</Label>
