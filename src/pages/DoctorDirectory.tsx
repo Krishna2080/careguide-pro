@@ -57,7 +57,7 @@ const DoctorDirectory = () => {
     
     // Set up real-time subscription for profile changes
     const channel = supabase
-      .channel('public:profiles:role=eq.doctor')
+      .channel('profiles-changes')
       .on(
         'postgres_changes',
         {
@@ -66,12 +66,23 @@ const DoctorDirectory = () => {
           table: 'profiles'
         },
         (payload) => {
-          console.log('Profile change detected:', payload);
-          // Refetch doctors when any doctor profile changes
-          fetchDoctors();
+          console.log('Real-time profile change:', payload);
+          
+          if (payload.eventType === 'DELETE') {
+            // Remove deleted doctor immediately
+            setDoctors(prev => prev.filter(doc => doc.id !== payload.old.id));
+          } else if (payload.eventType === 'INSERT' && payload.new.role === 'doctor') {
+            // Add new doctor
+            fetchDoctors();
+          } else if (payload.eventType === 'UPDATE' && payload.new.role === 'doctor') {
+            // Update existing doctor
+            fetchDoctors();
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);

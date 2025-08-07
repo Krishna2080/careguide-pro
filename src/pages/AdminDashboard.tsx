@@ -111,23 +111,42 @@ const AdminDashboard = () => {
 
   const deleteDoctor = async (doctorId: string, doctorName: string) => {
     try {
+      console.log('Attempting to delete doctor:', doctorId, doctorName);
+      
       const { error } = await supabase
         .from('profiles')
         .delete()
         .eq('id', doctorId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
 
-      setDoctors(prev => prev.filter(doc => doc.id !== doctorId));
+      console.log('Delete successful, updating local state');
+      
+      // Update local state immediately
+      setDoctors(prev => {
+        const updated = prev.filter(doc => doc.id !== doctorId);
+        console.log('Updated doctors list:', updated.length);
+        return updated;
+      });
       
       toast({
         title: "Doctor Deleted",
         description: `${doctorName} has been removed from the system`,
       });
+      
+      // Force refresh from database to ensure consistency
+      setTimeout(() => {
+        fetchDoctors();
+      }, 1000);
+      
     } catch (error: any) {
+      console.error('Full delete error:', error);
       toast({
         title: "Delete Failed",
-        description: error.message,
+        description: error.message || 'Failed to delete doctor',
         variant: "destructive",
       });
     }
