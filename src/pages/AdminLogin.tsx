@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { FcGoogle } from 'react-icons/fc';
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('krishnamadaswar@gmail.com');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signInWithEmail, user, profile } = useAuth();
+  const { signInWithGoogle, user, profile } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (user && profile?.role === 'admin') {
@@ -22,28 +17,10 @@ const AdminLogin = () => {
     }
   }, [user, profile, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleSignIn = async () => {
     setLoading(true);
-
-    try {
-      const { error } = await signInWithEmail(email, password);
-      
-      if (!error) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to Admin Dashboard",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    await signInWithGoogle();
+    setLoading(false);
   };
 
   return (
@@ -60,39 +37,28 @@ const AdminLogin = () => {
             Manage doctor profiles and directory
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="krishnamadaswar@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+        <CardContent className="space-y-6">
+          <Button 
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full h-12 text-base"
+            variant="medical"
+          >
+            <FcGoogle className="w-5 h-5 mr-3" />
+            {loading ? 'Signing in...' : 'Continue with Google (Admin)'}
+          </Button>
+          
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-red-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-red-900 mb-1">Admin Access Only</h4>
+                <p className="text-sm text-red-700 leading-relaxed">
+                  This portal is restricted to authorized administrators only. Contact your system administrator if you need access.
+                </p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full" 
-              variant="medical"
-              disabled={loading}
-            >
-              {loading ? 'Signing In...' : 'Sign In as Admin'}
-            </Button>
-          </form>
+          </div>
           
           <div className="mt-6 text-center">
             <Button 

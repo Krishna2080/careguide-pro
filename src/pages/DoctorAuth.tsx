@@ -1,50 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, UserPlus, LogIn } from 'lucide-react';
+import { Stethoscope, UserCheck, Clock } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 
 const DoctorAuth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signInWithEmail, signUpWithEmail } = useAuth();
+  const { signInWithGoogle, user, profile } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const { error } = await signInWithEmail(email, password);
-    
-    if (!error) {
+  useEffect(() => {
+    if (user && profile) {
       navigate('/doctor-dashboard');
     }
-    
-    setLoading(false);
-  };
+  }, [user, profile, navigate]);
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleSignIn = async () => {
     setLoading(true);
-
-    const { error } = await signUpWithEmail(email, password, {
-      full_name: fullName,
-      role: 'doctor',
-    });
-    
+    await signInWithGoogle();
     setLoading(false);
-    
-    if (!error) {
-      setEmail('');
-      setPassword('');
-      setFullName('');
-    }
   };
 
   return (
@@ -58,103 +34,43 @@ const DoctorAuth = () => {
             Doctor Portal
           </CardTitle>
           <CardDescription>
-            Access your medical practice dashboard
+            Sign in with Google to access your medical practice dashboard
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin" className="flex items-center gap-2">
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger value="signup" className="flex items-center gap-2">
-                <UserPlus className="w-4 h-4" />
-                Sign Up
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  variant="medical"
-                  disabled={loading}
-                >
-                  {loading ? 'Signing In...' : 'Sign In'}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Dr. John Smith"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Create a secure password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  variant="medical"
-                  disabled={loading}
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+        <CardContent className="space-y-6">
+          <Button 
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full h-12 text-base"
+            variant="outline"
+          >
+            <FcGoogle className="w-5 h-5 mr-3" />
+            {loading ? 'Signing in...' : 'Continue with Google'}
+          </Button>
+          
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="flex items-start gap-3">
+              <UserCheck className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-blue-900 mb-1">Account Approval Required</h4>
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  After signing in, your account will need admin approval before you can complete your profile and access the platform.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+            <div className="flex items-start gap-3">
+              <Clock className="w-5 h-5 text-amber-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-amber-900 mb-1">Next Steps</h4>
+                <p className="text-sm text-amber-700 leading-relaxed">
+                  Once approved, you'll be able to complete your professional profile with qualifications, experience, and availability details.
+                </p>
+              </div>
+            </div>
+          </div>
           
           <div className="mt-6 text-center">
             <Button 

@@ -10,14 +10,14 @@ const Landing = () => {
 
   const features = [
     {
-      icon: Users,
-      title: "Comprehensive Directory",
-      description: "Access detailed profiles of healthcare professionals in your area"
+      icon: Shield,
+      title: "Secure Admin Platform",
+      description: "Comprehensive admin dashboard for managing healthcare professionals"
     },
     {
-      icon: MapPin,
-      title: "Location-Based Search",
-      description: "Find doctors by city, hospital, or specialty with advanced filtering"
+      icon: Stethoscope,
+      title: "Doctor Onboarding",
+      description: "Streamlined registration and approval process for medical professionals"
     },
     {
       icon: Heart,
@@ -46,16 +46,7 @@ const Landing = () => {
                 Your comprehensive medical directory platform. Connect patients with qualified healthcare professionals and streamline medical practice management.
               </p>
               
-              <div className="grid sm:grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
-                <Button
-                  onClick={() => navigate('/directory')}
-                  variant="default"
-                  size="lg"
-                  className="flex items-center gap-3"
-                >
-                  <Users className="w-5 h-5" />
-                  View Directory
-                </Button>
+              <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto lg:mx-0">
                 
                 <Button
                   onClick={() => navigate('/doctor-auth')}

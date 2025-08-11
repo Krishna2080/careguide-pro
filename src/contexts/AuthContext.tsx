@@ -8,8 +8,7 @@ interface AuthContextType {
   session: Session | null;
   profile: any;
   loading: boolean;
-  signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithEmail: (email: string, password: string, userData: { full_name: string; role: 'doctor' | 'admin' }) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -73,49 +72,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      toast({
-        title: "Login Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-
-    return { error };
-  };
-
-  const signUpWithEmail = async (
-    email: string,
-    password: string,
-    userData: { full_name: string; role: 'doctor' | 'admin' }
-  ) => {
-    const redirectUrl = `${window.location.origin}/`;
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
       options: {
-        emailRedirectTo: redirectUrl,
-        data: userData,
+        redirectTo: `${window.location.origin}/doctor-dashboard`,
       },
     });
 
     if (error) {
       toast({
-        title: "Registration Failed",
+        title: "Google Sign In Failed",
         description: error.message,
         variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Registration Successful",
-        description: "Please check your email to verify your account.",
       });
     }
 
@@ -134,8 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     profile,
     loading,
-    signInWithEmail,
-    signUpWithEmail,
+    signInWithGoogle,
     signOut,
   };
 

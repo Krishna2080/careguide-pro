@@ -9,7 +9,7 @@ import DoctorAuth from "./pages/DoctorAuth";
 import AdminLogin from "./pages/AdminLogin";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import DoctorDirectory from "./pages/DoctorDirectory";
+import ProtectedDoctorDirectory from "./pages/ProtectedDoctorDirectory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/admin-auth" element={<AdminLogin />} />
             <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/directory" element={<DoctorDirectory />} />
+            <Route path="/directory" element={<ProtectedDoctorDirectory />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
